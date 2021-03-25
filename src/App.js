@@ -6,6 +6,8 @@ const App = () => {
   const [noteInput, setNoteInput] = useState('');
   const [subNoteInput, setSubNoteInput] = useState('');
 
+  const [update, setUpdate] = useState(false);
+
   const [displayInputField, setDisplayInputField] = useState(false);
 
   const handleNoteSubmit = (e) => {
@@ -18,56 +20,88 @@ const App = () => {
   };
 
   const deleteNote = (id) => {
-    setNoteState(notesState.filter((item) => item.id !== id));
+    const tempNotesState = notesState;
+    tempNotesState.forEach((note, index) => {
+      if (note.id === id) {
+        tempNotesState.splice(index, 1);
+        setNoteState(tempNotesState);
+        setUpdate(!update);
+      } else {
+        if (note.subNote.length > 0) {
+          const subNote = handleRecursiveSubNoteDelete(note.subNote, id);
+          tempNotesState[index].subNote = subNote;
+          setNoteState(tempNotesState);
+          setUpdate(!update);
+        }
+      }
+    });
+  };
+
+  const handleRecursiveSubNoteDelete = (sNote, id) => {
+    const subNote = sNote;
+
+    subNote.forEach((note, index) => {
+      if (note.id === id) {
+        subNote.splice(index, 1);
+      } else {
+        if (note.subNote.length > 0) {
+          handleRecursiveSubNoteDelete(note.subNote, id);
+        }
+      }
+    });
+    return subNote;
   };
 
   const handleSubNoteSubmit = (id) => {
-    const tempNotesState = notesState.map((note) =>
-      note.id === id
-        ? { ...note, subNote: [...note.subNote, { title: subNoteInput, id: uuidv4() }] }
-        : note
-    );
-    setNoteState(tempNotesState);
-    setSubNoteInput('');
-    setDisplayInputField(false);
+    const tempNotesState = notesState;
+
+    tempNotesState.forEach((note, index) => {
+      if (note.id === id) {
+        tempNotesState[index].subNote.push({ title: subNoteInput, id: uuidv4(), subNote: [] });
+        setNoteState(tempNotesState);
+        setSubNoteInput('');
+        setDisplayInputField(false);
+      } else {
+        if (note.subNote.length > 0) {
+          const subNote = handleRecursiveSubNoteSubmit(note.subNote, id);
+          tempNotesState[index].subNote = subNote;
+          setNoteState(tempNotesState);
+          setSubNoteInput('');
+          setDisplayInputField(false);
+        }
+      }
+    });
   };
 
-  const deleteSubNote = (parentId, noteId) => {
-    const tempNotesState = notesState.map((note) =>
-      note.id === parentId
-        ? { ...note, subNote: note.subNote.filter((n) => n.id !== noteId) }
-        : note
-    );
-    setNoteState(tempNotesState);
-  };
+  const handleRecursiveSubNoteSubmit = (sNote, id) => {
+    const subNote = sNote;
 
-  const ReturnSubNote = ({ note, parentId }) => (
-    <Fragment key={note.id}>
-      <br />
-      <ul key={note.id}>
-        <li>{note.title}</li>
-        <button
-          type="submit"
-          class="btn btn-danger"
-          onClick={() => deleteSubNote(parentId, note.id)}
-        >
-          Delete
-        </button>
-      </ul>
-    </Fragment>
-  );
+    subNote.forEach((note, index) => {
+      if (note.id === id) {
+        subNote[index].subNote.push({ title: subNoteInput, id: uuidv4(), subNote: [] });
+      } else {
+        if (note.subNote.length > 0) {
+          handleRecursiveSubNoteSubmit(note.subNote, id);
+        }
+      }
+    });
+    return subNote;
+  };
 
   const ReturnNote = ({ note }) => (
     <Fragment key={note.id}>
-      <br />
       <hr />
       <ul>
         <li>{note.title}</li>
-        <button type="submit" class="btn btn-warning" onClick={() => setDisplayInputField(note.id)}>
+        <button
+          type="submit"
+          className="btn btn-warning"
+          onClick={() => setDisplayInputField(note.id)}
+        >
           New Note
         </button>
         &nbsp; &nbsp; &nbsp;
-        <button type="submit" class="btn btn-danger" onClick={() => deleteNote(note.id)}>
+        <button type="submit" className="btn btn-danger" onClick={() => deleteNote(note.id)}>
           Delete
         </button>
         <br />
@@ -77,7 +111,7 @@ const App = () => {
             <div className="col-8">
               <input
                 placeholder="Type to make a Note"
-                class="form-control"
+                className="form-control"
                 autoFocus={true}
                 onChange={(e) => setSubNoteInput(e.target.value)}
                 value={subNoteInput}
@@ -87,17 +121,17 @@ const App = () => {
             <div className="col-4">
               <button
                 type="submit"
-                class="btn btn-primary"
-                onClick={() => handleSubNoteSubmit(note.id)}
+                className="btn btn-primary"
+                onClick={() => handleSubNoteSubmit(displayInputField)}
               >
                 Submit
               </button>
             </div>
           </div>
         )}
-        {note.subNote.map((sNote) => (
-          <ReturnSubNote note={sNote} parentId={note.id} />
-        ))}
+        {note.subNote &&
+          note.subNote.length > 0 &&
+          note.subNote.map((sNote) => <ReturnNote note={sNote} key={sNote.id} />)}
       </ul>
     </Fragment>
   );
@@ -109,7 +143,7 @@ const App = () => {
           <input
             disabled={displayInputField}
             placeholder="Type to make a Note"
-            class="form-control"
+            className="form-control"
             onChange={(e) => setNoteInput(e.target.value)}
             value={noteInput}
           />
@@ -118,7 +152,7 @@ const App = () => {
         <div className="col-4">
           <button
             type="submit"
-            class="btn btn-primary"
+            className="btn btn-primary"
             onClick={handleNoteSubmit}
             disabled={displayInputField}
           >
@@ -126,7 +160,7 @@ const App = () => {
           </button>
         </div>
       </div>
-      {notesState.length > 0 && notesState.map((note) => <ReturnNote note={note} />)}
+      {notesState.length > 0 && notesState.map((note) => <ReturnNote note={note} key={note.id} />)}
     </div>
   );
 };
