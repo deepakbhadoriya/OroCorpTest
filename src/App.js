@@ -107,29 +107,29 @@ const App = () => {
         <br />
         <br />
         {note.id === displayInputField && (
-          <div className="row">
-         <form>
-            <div className="col-8">
-              <input
-                placeholder="Type to make a Note"
-                className="form-control"
-                autoFocus={true}
-                onChange={(e) => setSubNoteInput(e.target.value)}
-                value={subNoteInput}
-              />
-            </div>
-            <br />
-            <div className="col-4">
-              <button
-                type="submit"
-                className="btn btn-primary"
-                onClick={() => handleSubNoteSubmit(displayInputField)}
-              >
-                Submit
-              </button>
+          <form>
+            <div className="row">
+              <div className="col-8">
+                <input
+                  placeholder="Type to make a Note"
+                  className="form-control"
+                  autoFocus={true}
+                  onChange={(e) => setSubNoteInput(e.target.value)}
+                  value={subNoteInput}
+                />
+              </div>
+              <br />
+              <div className="col-4">
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  onClick={() => handleSubNoteSubmit(displayInputField)}
+                >
+                  Submit
+                </button>
+              </div>
             </div>
           </form>
-          </div>
         )}
         {note.subNote &&
           note.subNote.length > 0 &&
@@ -140,28 +140,30 @@ const App = () => {
 
   return (
     <div className="container">
-      <div className="row mt-5 ">
-        <div className="col-8">
-          <input
-            disabled={displayInputField}
-            placeholder="Type to make a Note"
-            className="form-control"
-            onChange={(e) => setNoteInput(e.target.value)}
-            value={noteInput}
-          />
+      <form>
+        <div className="row mt-5 ">
+          <div className="col-8">
+            <input
+              disabled={displayInputField}
+              placeholder="Type to make a Note"
+              className="form-control"
+              onChange={(e) => setNoteInput(e.target.value)}
+              value={noteInput}
+            />
+          </div>
+          <br />
+          <div className="col-4">
+            <button
+              type="submit"
+              className="btn btn-primary"
+              onClick={handleNoteSubmit}
+              disabled={displayInputField}
+            >
+              Submit
+            </button>
+          </div>
         </div>
-        <br />
-        <div className="col-4">
-          <button
-            type="submit"
-            className="btn btn-primary"
-            onClick={handleNoteSubmit}
-            disabled={displayInputField}
-          >
-            Submit
-          </button>
-        </div>
-      </div>
+      </form>
       {notesState.length > 0 && notesState.map((note) => <ReturnNote note={note} key={note.id} />)}
     </div>
   );
