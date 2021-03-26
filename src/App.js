@@ -108,6 +108,7 @@ const App = () => {
         <br />
         {note.id === displayInputField && (
           <div className="row">
+         <form>
             <div className="col-8">
               <input
                 placeholder="Type to make a Note"
@@ -127,6 +128,7 @@ const App = () => {
                 Submit
               </button>
             </div>
+          </form>
           </div>
         )}
         {note.subNote &&
